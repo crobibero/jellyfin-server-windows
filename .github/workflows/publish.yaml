@@ -1,0 +1,58 @@
+name: 'Publish'
+
+on:
+  workflow_dispatch:
+    inputs:
+      jellyfin-tag:
+        required: true
+        type: string
+        description: "The jellyfin tag"
+      type:
+        required: true
+        type: string
+        description: "stable/unstable/stable-pre"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+
+      - name: Install NSIS
+        run: |
+          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+          scoop bucket add extras
+          scoop install nsis
+
+      - name: Download and extract release
+        run: |
+          Invoke-WebRequest -Uri 'https://repo.jellyfin.org/releases/server/windows/${{ inputs.type }}/combined/jellyfin_${{ inputs.jellyfin-tag }}.zip' -OutFile jellyfin.zip
+
+          
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2.4.0
+        with:
+          path: ./jellyfin-server-windows
+
+      - name: Clone Server Repository
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: jellyfin/jellyfin
+          ref: ${{ inputs.jellyfin-server-tag }}
+          path: ./jellyfin
+
+      - name: Clone Web Repository
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: jellyfin/jellyfin-web
+          ref: ${{ inputs.jellyfin-web-tag }}
+          path: ./jellyfin/jellyfin-web
+
+      - name: Clone UX Repository
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: jellyfin/jellyfin-web
+          ref: ${{ inputs.jellyfin-web-tag }}
+          path: ./jellyfin-ux
+
+      - name: 

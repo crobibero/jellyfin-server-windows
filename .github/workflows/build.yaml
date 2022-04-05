@@ -1,0 +1,18 @@
+name: 'Build'
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2.4.0
+
+      - name: Build
+        run: dotnet build -c Release
+
+      - name: Run winget
+        run: |
+          winget install nsis
