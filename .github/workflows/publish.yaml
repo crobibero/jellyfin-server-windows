@@ -32,7 +32,7 @@ jobs:
       - name: Get Release Variables
         if: ${{ github.event_name == 'release' }}
         run: |
-          if ( '${{ github.event.release.prerelease }}' == 'true' ) {
+          if ( '${{ github.event.release.prerelease }}' -eq 'true' ) {
             echo "release_type=stable-pre" | Add-Content -Path $ENV:GITHUB_ENV
           } else {
             echo "release_type=stable" | Add-Content -Path $ENV:GITHUB_ENV
