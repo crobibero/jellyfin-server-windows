@@ -31,7 +31,7 @@ jobs:
         if: ${{ github.event_name == 'release' }}
         run: |
           echo "jellyfin_version=${{ github.event.release.tag_name }}" | Add-Content -Path $ENV:GITHUB_ENV
-          echo "release_type=${{ github.event.release.prerelease == true ? stable-pre : stable }}" | Add-Content -Path $ENV:GITHUB_ENV
+          echo "release_type=${{ github.event.release.prerelease == true ? 'stable-pre' : 'stable' }}" | Add-Content -Path $ENV:GITHUB_ENV
 
       - name: Get Dispatch Variables
         if: ${{ github.event_name == 'workflow_dispatch' }}
