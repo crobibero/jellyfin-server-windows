@@ -4,7 +4,7 @@ on:
   push:
   workflow_dispatch:
     inputs:
-      jellyfin-tag:
+      jellyfin:
         required: true
         type: string
         description: "The jellyfin tag"
@@ -21,11 +21,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Build
-        shell: pwsh
-        run: |
-          dotnet build -c Release
 
       - name: Install NSIS
         run: |
@@ -54,10 +49,16 @@ jobs:
           $env:InstallLocation = $(Resolve-Path .\jellyfin\jellyfin_*)
           makensis /Dx64 /DUXPATH=$(Resolve-Path .\jellyfin-ux) $(Join-Path -Path $(Resolve-Path .\nsis) -ChildPath jellyfin.nsi)
 
+      - name: Rename Installer
+        run: |
+          cd .\nsis
+          $version = "10.8.0-beta1"
+          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin" + $version + "_windows-x64.exe")
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: installer
+          name: windows-x64
           retention-days: 30
           if-no-files-found: error
-          path: .\**\jellyfin_*_windows-x64.exe
+          path: .\nsis\jellyfin_*_windows-x64.exe
