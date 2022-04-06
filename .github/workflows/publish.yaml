@@ -29,16 +29,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Get Release Variables
-        if: ${{ github.event_name == 'release' }}
+      - name: Get Pre Release Variables
+        if: ${{ github.event_name == 'release' && github.event.release.prerelease }}
         run: |
-          if ( '${{ github.event.release.prerelease }}' -eq 'true' ) {
-            echo "release_type=stable-pre" | Add-Content -Path $ENV:GITHUB_ENV
-          } else {
-            echo "release_type=stable" | Add-Content -Path $ENV:GITHUB_ENV
-          }
+          echo "release_type=stable-pre" | Add-Content -Path $ENV:GITHUB_ENV
           echo "jellyfin_version=${{ github.event.release.tag_name }}" | Add-Content -Path $ENV:GITHUB_ENV
-          echo ${{ env.release_type }}
+
+      - name: Get Release Variables
+        if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+        run: |
+          echo "release_type=stable" | Add-Content -Path $ENV:GITHUB_ENV
+          echo "jellyfin_version=${{ github.event.release.tag_name }}" | Add-Content -Path $ENV:GITHUB_ENV
 
       - name: Get Dispatch Variables
         if: ${{ github.event_name == 'workflow_dispatch' }}
