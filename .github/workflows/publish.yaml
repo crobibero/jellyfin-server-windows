@@ -2,16 +2,22 @@ name: 'Publish'
 
 on:
   push:
+  release:
+    types:
+      - "released"
   workflow_dispatch:
     inputs:
       jellyfin:
         required: true
         type: string
-        description: "The jellyfin tag"
+        description: "The Jellyfin version"
       type:
         required: true
-        type: string
-        description: "stable/unstable/stable-pre"
+        type: choice
+        description: "stable/stable-pre"
+        options:
+          - "stable"
+          - "stable-pre"
 
 jobs:
   publish:
@@ -21,6 +27,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Get Variables
+        id: variables
+        run: |
+          echo "::set-output name=version::10.8.0-beta1"
+          echo "::set-output name=type::stable-pre"
 
       - name: Install NSIS
         run: |
@@ -37,7 +49,7 @@ jobs:
 
       - name: Setup Jellyfin server
         run: |
-          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/stable-pre/10.8.0-beta1/combined/jellyfin_10.8.0-beta1.zip' -OutFile 'jellyfin.zip'
+          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/${{ steps.variables.type }}/${{ steps.variables.version }}/combined/jellyfin_${{ steps.variables.version }}.zip' -OutFile 'jellyfin.zip'
           Expand-Archive 'jellyfin.zip'
           Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin_*)
 
@@ -52,8 +64,7 @@ jobs:
       - name: Rename Installer
         run: |
           cd .\nsis
-          $version = "10.8.0-beta1"
-          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin" + $version + "_windows-x64.exe")
+          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_" + ${{ steps.variables.version }} + "_windows-x64.exe")
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
