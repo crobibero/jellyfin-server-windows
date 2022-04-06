@@ -1,0 +1,86 @@
+name: 'Publish'
+
+on:
+  release:
+    types:
+      - "released"
+  workflow_dispatch:
+    inputs:
+      jellyfin_version:
+        required: true
+        type: string
+        description: "The Jellyfin version"
+      release_type:
+        required: true
+        type: choice
+        description: "stable/stable-pre"
+        options:
+          - "stable"
+          - "stable-pre"
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Pre Release Variables
+        if: ${{ github.event_name == 'release' && github.event.release.prerelease }}
+        run: |
+          echo "jellyfin_version=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          echo "release_type=stable-pre" >> $GITHUB_ENV
+
+      - name: Get Release Variables
+        if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+        run: |
+          echo "jellyfin_version=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          echo "release_type=stable" >> $GITHUB_ENV
+
+      - name: Get Dispatch Variables
+        if: ${{ github.event_name != 'release' }}
+        run: |
+          echo "jellyfin_version=${{ inputs.jellyfin_version }}" >> $GITHUB_ENV
+          echo "release_type=${{ inputs.release_type }}" >> $GITHUB_ENV
+
+      - name: Install NSIS
+        run: |
+          Invoke-WebRequest 'https://get.scoop.sh' -OutFile 'scoop-install.ps1'
+          .\scoop-install.ps1 -RunAsAdmin
+          scoop bucket add extras
+          scoop install nsis
+
+      - name: Clone UX Repository
+        uses: actions/checkout@v3
+        with:
+          repository: jellyfin/jellyfin-ux
+          path: .\jellyfin-ux
+
+      - name: Setup Jellyfin server
+        run: |
+          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/${{ env.release_type }}/${{ env.jellyfin_version }}/combined/jellyfin_${{ env.jellyfin_version }}.zip' -OutFile 'jellyfin.zip'
+          Expand-Archive 'jellyfin.zip'
+          Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin_*)
+
+      - name: Publish Tray
+        run: dotnet publish -c Release -r win-x64 --no-self-contained --output $(Resolve-Path .\jellyfin\jellyfin_*)
+
+      - name: Build installer
+        run: |
+          $env:InstallLocation = $(Resolve-Path .\jellyfin\jellyfin_*)
+          makensis /Dx64 /DUXPATH=$(Resolve-Path .\jellyfin-ux) $(Join-Path -Path $(Resolve-Path .\nsis) -ChildPath jellyfin.nsi)
+
+      - name: Rename Installer
+        run: |
+          cd .\nsis
+          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ env.jellyfin_version }}_windows-x64.exe")
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-x64
+          retention-days: 30
+          if-no-files-found: error
+          path: .\nsis\jellyfin_*_windows-x64.exe
