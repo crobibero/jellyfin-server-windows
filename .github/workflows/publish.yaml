@@ -43,7 +43,7 @@ jobs:
           Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/stable-pre/10.8.0-beta1/combined/jellyfin_10.8.0-beta1.zip' -OutFile 'jellyfin.zip'
           Expand-Archive 'jellyfin.zip'
           cd .\jellyfin\jellyfin*
-          Copy-Item ".\Support Files\LICESNSE" -Destination .
+          Copy-Item ".\Support Files\LICENSE" -Destination .
 
       - name: Publish Tray
         run: dotnet publish -c Release -r win-x64 --no-self-contained --output ./jellyfin
