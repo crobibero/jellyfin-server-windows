@@ -45,6 +45,11 @@ jobs:
           echo "jellyfin_version=${{ github.event.inputs.jellyfin_version }}" >> $GITHUB_ENV
           echo "release_type=${{ github.event.inputs.release_type }}" >> $GITHUB_ENV
 
+      - name: Echo Variables
+        run: |
+          echo "${{ env.jellyfin_version }}"
+          echo "${{ env.release_type }}"
+
       - name: Install NSIS
         run: |
           Invoke-WebRequest 'https://get.scoop.sh' -OutFile 'scoop-install.ps1'
