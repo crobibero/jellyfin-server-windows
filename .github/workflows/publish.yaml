@@ -1,6 +1,7 @@
 name: 'Publish'
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       jellyfin-tag:
@@ -16,43 +17,43 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Build
+        shell: pwsh
+        run: |
+          dotnet build -c Release
 
       - name: Install NSIS
         run: |
-          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+          Invoke-WebRequest 'https://get.scoop.sh' -OutFile 'scoop-install.ps1'
+          .\scoop-install.ps1 -RunAsAdmin
           scoop bucket add extras
           scoop install nsis
 
-      - name: Download and extract release
-        run: |
-          Invoke-WebRequest -Uri 'https://repo.jellyfin.org/releases/server/windows/${{ inputs.type }}/combined/jellyfin_${{ inputs.jellyfin-tag }}.zip' -OutFile jellyfin.zip
-
-          
-
-      - name: Checkout Repository
-        uses: actions/checkout@v2.4.0
-        with:
-          path: ./jellyfin-server-windows
-
-      - name: Clone Server Repository
-        uses: actions/checkout@v2.4.0
-        with:
-          repository: jellyfin/jellyfin
-          ref: ${{ inputs.jellyfin-server-tag }}
-          path: ./jellyfin
-
-      - name: Clone Web Repository
-        uses: actions/checkout@v2.4.0
-        with:
-          repository: jellyfin/jellyfin-web
-          ref: ${{ inputs.jellyfin-web-tag }}
-          path: ./jellyfin/jellyfin-web
-
       - name: Clone UX Repository
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
-          repository: jellyfin/jellyfin-web
-          ref: ${{ inputs.jellyfin-web-tag }}
+          repository: jellyfin/jellyfin-ux
           path: ./jellyfin-ux
 
-      - name: 
+      - name: Setup Jellyfin server
+        run: |
+          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/stable-pre/10.8.0-beta1/combined/jellyfin_10.8.0-beta1.zip' -OutFile 'jellyfin.zip'
+          Expand-Archive 'jellyfin.zip'
+          $env:InstallLocation = "D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin"
+
+      - name: Publish Tray
+        run: dotnet publish -c Release -r win-x64 --no-self-contained --output ./jellyfin
+
+      - name: Build installer
+        run: makensis /Dx64 /DUXPATH="D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin-ux" "D:\a\jellyfin-server-windows\jellyfin-server-windows\nsis\jellyfin.nsi"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: installer
+          retention-days: 30
+          if-no-files-found: error
+          path: D:\a\jellyfin-server-windows\jellyfin-server-windows\nsis\jellyfin_10.8.0_windows-x64.exe
