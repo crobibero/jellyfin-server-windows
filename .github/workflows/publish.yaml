@@ -42,16 +42,15 @@ jobs:
         run: |
           Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/stable-pre/10.8.0-beta1/combined/jellyfin_10.8.0-beta1.zip' -OutFile 'jellyfin.zip'
           Expand-Archive 'jellyfin.zip'
-          ls "D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin"
-          cd .\jellyfin\jellyfin*
-          $env:InstallLocation = Get-Location
-          $env:InstallLocation
 
       - name: Publish Tray
         run: dotnet publish -c Release -r win-x64 --no-self-contained --output ./jellyfin
 
       - name: Build installer
-        run: makensis /Dx64 /DUXPATH="D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin-ux" "D:\a\jellyfin-server-windows\jellyfin-server-windows\nsis\jellyfin.nsi"
+        run: |
+          cd .\jellyfin\jellyfin*
+          $env:InstallLocation = Get-Location
+          makensis /Dx64 /DUXPATH="D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin-ux" "D:\a\jellyfin-server-windows\jellyfin-server-windows\nsis\jellyfin.nsi"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
