@@ -45,6 +45,7 @@ jobs:
           ls "D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin"
           cd .\jellyfin\jellyfin*
           $env:InstallLocation = Get-Location
+          $env:InstallLocation
 
       - name: Publish Tray
         run: dotnet publish -c Release -r win-x64 --no-self-contained --output ./jellyfin
