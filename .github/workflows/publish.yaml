@@ -44,13 +44,12 @@ jobs:
 
       - name: Echo Variables
         run: |
-          echo "${{ env.action_state }}"
-          echo "${{ env.jellyfin_version }}"
-          echo "${{ env.jellyfin_version1 }}"
-          echo "${{ env.release_type }}"
-          echo "${{ env.release_type1 }}"
+          echo "$jellyfin_version"
+          echo "$jellyfin_version1"
+          echo "env.release_type"
+          echo "env.release_type1"
           echo "abc123=yes" >> $GITHUB_ENV
-          echo "${{ env.abc123 }}"
+          echo "$abc123"
 
       - name: Install NSIS
         run: |
