@@ -54,7 +54,7 @@ jobs:
           Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin_*)
 
       - name: Publish Tray
-        run: dotnet publish -c Release -r win-x64 --no-self-contained --output .\jellyfin
+        run: dotnet publish -c Release -r win-x64 --no-self-contained --output $(Resolve-Path .\jellyfin\jellyfin_*)
 
       - name: Build installer
         run: |
