@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: jellyfin/jellyfin-ux
-          path: ./jellyfin-ux
+          path: .\jellyfin-ux
 
       - name: Setup Jellyfin server
         run: |
@@ -47,14 +47,12 @@ jobs:
           Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin_*)
 
       - name: Publish Tray
-        run: dotnet publish -c Release -r win-x64 --no-self-contained --output ./jellyfin
+        run: dotnet publish -c Release -r win-x64 --no-self-contained --output .\jellyfin
 
       - name: Build installer
         run: |
-          cd .\jellyfin\jellyfin*
-          $env:InstallLocation = Get-Location
-          $nsis = $(Resolve-Path nsis)
-          makensis /Dx64 /DUXPATH=$(Resolve-Path .\jellyfin-ux) $(Join-Path -Path $(Resolve-Path nsis) -ChildPath jellyfin.nsi)
+          $env:InstallLocation = $(Resolve-Path .\jellyfin\jellyfin_*)
+          makensis /Dx64 /DUXPATH=$(Resolve-Path .\jellyfin-ux) $(Join-Path -Path $(Resolve-Path .\nsis) -ChildPath jellyfin.nsi)
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
