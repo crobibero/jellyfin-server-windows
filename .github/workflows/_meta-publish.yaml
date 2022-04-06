@@ -1,23 +1,12 @@
-name: 'Publish'
-
-on:
-  release:
-    types:
-      - "released"
-      - "prereleased"
-  workflow_dispatch:
+﻿on:
+  workflow_call:
     inputs:
       jellyfin_version:
         required: true
         type: string
-        description: "The Jellyfin version (eg: 10.8.0, 10.8.0-beta1)"
-      release_type:
+      server_url:
         required: true
-        type: choice
-        description: "stable/stable-pre"
-        options:
-          - "stable"
-          - "stable-pre"
+        type: string
 
 jobs:
   publish:
@@ -27,24 +16,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Get Pre Release Variables
-        if: ${{ github.event_name == 'release' && github.event.release.prerelease }}
-        run: |
-          echo "release_type=stable-pre" | Add-Content -Path $ENV:GITHUB_ENV
-          echo "jellyfin_version=${{ github.event.release.tag_name }}" | Add-Content -Path $ENV:GITHUB_ENV
-
-      - name: Get Release Variables
-        if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
-        run: |
-          echo "release_type=stable" | Add-Content -Path $ENV:GITHUB_ENV
-          echo "jellyfin_version=${{ github.event.release.tag_name }}" | Add-Content -Path $ENV:GITHUB_ENV
-
-      - name: Get Dispatch Variables
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "jellyfin_version=${{ github.event.inputs.jellyfin_version }}" | Add-Content -Path $ENV:GITHUB_ENV
-          echo "release_type=${{ github.event.inputs.release_type }}" | Add-Content -Path $ENV:GITHUB_ENV
 
       - name: Install NSIS
         run: |
@@ -61,7 +32,7 @@ jobs:
 
       - name: Setup Jellyfin server
         run: |
-          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/${{ env.release_type }}/${{ env.jellyfin_version }}/combined/jellyfin_${{ env.jellyfin_version }}.zip' -OutFile 'jellyfin.zip'
+          Invoke-WebRequest '${{ inputs.server_url }}' -OutFile 'jellyfin.zip'
           Expand-Archive 'jellyfin.zip'
           Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin_*)
 
@@ -76,7 +47,7 @@ jobs:
       - name: Rename Installer
         run: |
           cd .\nsis
-          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ env.jellyfin_version }}_windows-x64.exe")
+          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ inputs.jellyfin_url }}_windows-x64.exe")
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
@@ -87,7 +58,7 @@ jobs:
           path: .\nsis\jellyfin_*_windows-x64.exe
 
       - name: Upload to GitHub Release
-        if:  ${{ github.event_name == 'release' }}
+        if: ${{ github.event_name == 'release' }}
         uses: shogo82148/actions-upload-release-asset@v1.5.0
         with:
           upload_url: ${{ github.event.release.upload_url }}

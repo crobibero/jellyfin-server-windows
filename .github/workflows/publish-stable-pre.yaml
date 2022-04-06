@@ -1,0 +1,31 @@
+name: 'Publish'
+
+on:
+  release:
+    types:
+      - "prereleased"
+  workflow_dispatch:
+    inputs:
+      jellyfin_version:
+        required: true
+        type: string
+        description: "The Jellyfin version (eg: 10.8.0-beta1, 10.8.0-beta2)"
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: Get Release Variables
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          echo "jellyfin_version=${{ github.event.release.tag_name }}" | Add-Content -Path $ENV:GITHUB_ENV
+
+      - name: Get Dispatch Variables
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "jellyfin_version=${{ github.event.inputs.jellyfin_version }}" | Add-Content -Path $ENV:GITHUB_ENV
+
+      - uses: ./.github/workflows/_meta-publish.yaml
+        with:
+          jellyfin_version: ${{ env.jellyfin_version }}
+          server_url: https://repo.jellyfin.org/releases/server/windows/stable-pre/${{ env.jellyfin_version }}/combined/jellyfin_${{ env.jellyfin_version }}.zip
