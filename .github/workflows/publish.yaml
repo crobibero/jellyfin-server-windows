@@ -49,7 +49,7 @@ jobs:
 
       - name: Setup Jellyfin server
         run: |
-          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/${{ steps.variables.type }}/${{ steps.variables.version }}/combined/jellyfin_${{ steps.variables.version }}.zip' -OutFile 'jellyfin.zip'
+          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/${{ steps.variables.outputs.type }}/${{ steps.variables.outputs.version }}/combined/jellyfin_${{ steps.variables.outputs.version }}.zip' -OutFile 'jellyfin.zip'
           Expand-Archive 'jellyfin.zip'
           Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin_*)
 
@@ -64,7 +64,7 @@ jobs:
       - name: Rename Installer
         run: |
           cd .\nsis
-          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_" + ${{ steps.variables.version }} + "_windows-x64.exe")
+          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_" + ${{ steps.variables.outputs.version }} + "_windows-x64.exe")
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
