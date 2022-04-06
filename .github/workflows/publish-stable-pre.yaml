@@ -1,27 +1,25 @@
-name: 'Publish'
+name: 'Publish Stable-pre'
 
 on:
   release:
     types:
-      - "released"
+      - "prereleased"
   workflow_dispatch:
     inputs:
       jellyfin_version:
         required: true
         type: string
-        description: "The Jellyfin version (eg: 10.8.0, 10.7.7)"
+        description: "The Jellyfin version (eg: 10.8.0-beta1, 10.8.0-beta2)"
 
 jobs:
   publish:
     runs-on: windows-latest
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Get Release Variables
-        if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+        if: ${{ github.event_name == 'release' }}
         run: |
           echo "jellyfin_version=${{ github.event.release.tag_name }}" | Add-Content -Path $ENV:GITHUB_ENV
 
@@ -33,4 +31,4 @@ jobs:
       - uses: ./.github/workflows/_meta-publish.yaml
         with:
           jellyfin_version: ${{ env.jellyfin_version }}
-          server_url: https://repo.jellyfin.org/releases/server/windows/stable/combined/jellyfin_${{ env.jellyfin_version }}.zip
+          server_url: https://repo.jellyfin.org/releases/server/windows/stable-pre/${{ env.jellyfin_version }}/combined/${{ env.jellyfin_version }}.zip
