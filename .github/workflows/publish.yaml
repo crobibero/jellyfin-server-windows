@@ -86,3 +86,11 @@ jobs:
           retention-days: 30
           if-no-files-found: error
           path: .\nsis\jellyfin_*_windows-x64.exe
+
+      - name: Upload to GitHub Release
+        if:  ${{ github.event_name == 'release' }}
+        uses: shogo82148/actions-upload-release-asset@v1.5.0
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          overwrite: true
+          path: .\nsis\jellyfin_*_windows-x64.exe
