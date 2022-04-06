@@ -31,7 +31,7 @@ jobs:
         if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
         run: |
           echo "jellyfin_version=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
-          echo "release_type=${{ ${{ github.event.release.prerelease }} ? stable-pre : stable }}" >> $GITHUB_ENV
+          echo "release_type=${{ github.event.release.prerelease ? stable-pre : stable }}" >> $GITHUB_ENV
 
       - name: Get Dispatch Variables
         if: ${{ github.event_name != 'release' }}
