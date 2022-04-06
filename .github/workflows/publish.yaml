@@ -1,7 +1,6 @@
 name: 'Publish'
 
 on:
-  push:
   release:
     types:
       - "released"
@@ -28,11 +27,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Get Variables
-        id: variables
+      - name: Get Pre Release Variables
+        if: ${{ github.event_name == 'release' && github.event.release.prerelease }}
         run: |
-          echo "::set-output name=version::10.8.0-beta1"
-          echo "::set-output name=type::stable-pre"
+          echo "jellyfin_version=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          echo "release_type=stable-pre" >> $GITHUB_ENV
+
+      - name: Get Release Variables
+        if: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
+        run: |
+          echo "jellyfin_version=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          echo "release_type=stable" >> $GITHUB_ENV
+
+      - name: Get Dispatch Variables
+        if: ${{ github.event_name != 'release' }}
+        run: |
+          echo "jellyfin_version=10.8.0-beta1" >> $GITHUB_ENV
+          echo "release_type=stable-pre" >> $GITHUB_ENV
 
       - name: Install NSIS
         run: |
@@ -49,7 +60,7 @@ jobs:
 
       - name: Setup Jellyfin server
         run: |
-          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/${{ steps.variables.outputs.type }}/${{ steps.variables.outputs.version }}/combined/jellyfin_${{ steps.variables.outputs.version }}.zip' -OutFile 'jellyfin.zip'
+          Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/${{ env.release_type }}/${{ env.jellyfin_version }}/combined/jellyfin_${{ env.jellyfin_version }}.zip' -OutFile 'jellyfin.zip'
           Expand-Archive 'jellyfin.zip'
           Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin_*)
 
@@ -64,7 +75,7 @@ jobs:
       - name: Rename Installer
         run: |
           cd .\nsis
-          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ steps.variables.outputs.version }}_windows-x64.exe")
+          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ env.jellyfin_version }}_windows-x64.exe")
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
