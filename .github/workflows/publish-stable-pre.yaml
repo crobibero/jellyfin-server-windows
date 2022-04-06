@@ -1,4 +1,4 @@
-name: 'Publish Stable'
+name: 'Publish Stable-Pre'
 
 on:
   release:
