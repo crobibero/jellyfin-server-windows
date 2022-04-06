@@ -16,6 +16,8 @@ on:
 jobs:
   publish:
     runs-on: windows-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -42,8 +44,7 @@ jobs:
         run: |
           Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/stable-pre/10.8.0-beta1/combined/jellyfin_10.8.0-beta1.zip' -OutFile 'jellyfin.zip'
           Expand-Archive 'jellyfin.zip'
-          cd .\jellyfin\jellyfin*
-          Copy-Item ".\Support Files\LICENSE" -Destination .
+          Copy-Item ".\Support Files\LICENSE" -Destination $(Resolve-Path .\jellyfin\jellyfin_*)
 
       - name: Publish Tray
         run: dotnet publish -c Release -r win-x64 --no-self-contained --output ./jellyfin
@@ -52,7 +53,8 @@ jobs:
         run: |
           cd .\jellyfin\jellyfin*
           $env:InstallLocation = Get-Location
-          makensis /Dx64 /DUXPATH="D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin-ux" "D:\a\jellyfin-server-windows\jellyfin-server-windows\nsis\jellyfin.nsi"
+          $nsis = $(Resolve-Path nsis)
+          makensis /Dx64 /DUXPATH=$(Resolve-Path .\jellyfin-ux) $(Join-Path -Path $(Resolve-Path nsis) -ChildPath jellyfin.nsi)
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
@@ -60,4 +62,4 @@ jobs:
           name: installer
           retention-days: 30
           if-no-files-found: error
-          path: D:\a\jellyfin-server-windows\jellyfin-server-windows\nsis\jellyfin_*_windows-x64.exe
+          path: .\**\jellyfin_*_windows-x64.exe
