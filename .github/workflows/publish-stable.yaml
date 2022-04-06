@@ -15,6 +15,9 @@ jobs:
   publish:
     runs-on: windows-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Get Release Variables
         if: ${{ github.event_name == 'release' }}
         run: |
