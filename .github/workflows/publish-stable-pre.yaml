@@ -1,4 +1,4 @@
-name: 'Publish Stable-Pre'
+name: 'Publish Stable'
 
 on:
   release:
@@ -13,8 +13,7 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Test
-        run: |
-          - echo "${{ github.event.release.tag_name || github.event.inputs.jellyfin_version }}"
+    uses: ./.github/workflows/_meta-publish.yaml
+    with:
+      jellyfin_version: ${{ github.event.release.tag_name || github.event.inputs.jellyfin_version }}
+      server_url: https://repo.jellyfin.org/releases/server/windows/stable-pre/${{ github.event.release.tag_name || github.event.inputs.jellyfin_version }}/combined/jellyfin_${{ github.event.release.tag_name || github.event.inputs.jellyfin_version }}.zip
