@@ -37,14 +37,15 @@ jobs:
         if: ${{ github.event_name != 'release' }}
         run: |
           echo "action_state=yellow" >> $GITHUB_ENV
-          echo "jellyfin_version=${{ github.event.inputs.jellyfin_version }}" >> $GITHUB_ENV
-          echo "release_type=${{ github.event.inputs.release_type }}" >> $GITHUB_ENV
-          echo "jellyfin_version1=10.8.0-beta1" >> $GITHUB_ENV
-          echo "release_type1=stable-pre" >> $GITHUB_ENV
+          echo "jellyfin_version=${{ github.event.inputs.jellyfin_version }}" | Add-Content -Path $ENV:GITHUB_ENV
+          echo "release_type=${{ github.event.inputs.release_type }}" | Add-Content -Path $ENV:GITHUB_ENV
+          echo "jellyfin_version1=10.8.0-beta1" | Add-Content -Path $ENV:GITHUB_ENV
+          echo "release_type1=stable-pre" | Add-Content -Path $ENV:GITHUB_ENV
 
       - name: Echo Variables
         run: |
           echo "$jellyfin_version"
+          echo "${{ env.jellyfin_version }}"
           echo "$jellyfin_version1"
           echo "env.release_type"
           echo "env.release_type1"
