@@ -17,4 +17,4 @@ jobs:
     steps:
       - name: Test
         run: |
-          - echo "${{ ${{ github.event.release.tag_name || github.event.inputs.jellyfin_version }}"
+          - echo "${{ github.event.release.tag_name || github.event.inputs.jellyfin_version }}"
