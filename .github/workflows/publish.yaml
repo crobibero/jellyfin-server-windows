@@ -42,8 +42,8 @@ jobs:
       - name: Get Dispatch Variables
         if: ${{ github.event_name != 'release' }}
         run: |
-          echo "jellyfin_version=${{ inputs.jellyfin_version }}" >> $GITHUB_ENV
-          echo "release_type=${{ inputs.release_type }}" >> $GITHUB_ENV
+          echo "jellyfin_version=${{ github.event.inputs.jellyfin_version }}" >> $GITHUB_ENV
+          echo "release_type=${{ github.event.inputs.release_type }}" >> $GITHUB_ENV
 
       - name: Install NSIS
         run: |
