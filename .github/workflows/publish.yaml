@@ -14,7 +14,7 @@ on:
         description: "stable/unstable/stable-pre"
 
 jobs:
-  build:
+  publish:
     runs-on: windows-latest
     steps:
       - name: Checkout Repository
@@ -43,7 +43,8 @@ jobs:
           Invoke-WebRequest 'https://repo.jellyfin.org/releases/server/windows/stable-pre/10.8.0-beta1/combined/jellyfin_10.8.0-beta1.zip' -OutFile 'jellyfin.zip'
           Expand-Archive 'jellyfin.zip'
           ls "D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin"
-          $env:InstallLocation = "D:\a\jellyfin-server-windows\jellyfin-server-windows\jellyfin"
+          cd .\jellyfin\jellyfin*
+          $env:InstallLocation = Get-Location
 
       - name: Publish Tray
         run: dotnet publish -c Release -r win-x64 --no-self-contained --output ./jellyfin
