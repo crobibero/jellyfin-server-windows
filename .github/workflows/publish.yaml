@@ -64,7 +64,7 @@ jobs:
       - name: Rename Installer
         run: |
           cd .\nsis
-          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_" + ${{ steps.variables.outputs.version }} + "_windows-x64.exe")
+          Rename-Item -Path .\jellyfin_*_windows-x64.exe -NewName ("jellyfin_${{ steps.variables.outputs.version }}_windows-x64.exe")
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
