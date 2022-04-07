@@ -13,4 +13,4 @@ jobs:
     uses: ./.github/workflows/_meta-publish.yaml
     with:
       jellyfin_version: ${{ github.event.inputs.jellyfin_version }}
-      server_url: https://repo.jellyfin.org/releases/server/windows/versions/unstable/combined/${{ github.event.inputs.jellyfin_version }}/jellyfin_${{ github.event.inputs.jellyfin_version }}-unstable.zip
+      server_url: ${{ format('https://repo.jellyfin.org/releases/server/windows/versions/unstable/combined/{0}/jellyfin_{0}-unstable.zip', github.event.inputs.jellyfin_version) }}
