@@ -17,13 +17,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Install NSIS
-        run: |
-          Invoke-WebRequest 'https://get.scoop.sh' -OutFile 'scoop-install.ps1'
-          .\scoop-install.ps1 -RunAsAdmin
-          scoop bucket add extras
-          scoop install nsis
-
       - name: Clone UX Repository
         uses: actions/checkout@v3
         with:
