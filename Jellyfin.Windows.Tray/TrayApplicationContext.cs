@@ -247,6 +247,7 @@ public class TrayApplicationContext : ApplicationContext
             Process p = new Process();
             p.StartInfo.FileName = _executableFile;
             p.StartInfo.CreateNoWindow = true;
+            p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             p.StartInfo.Arguments = "--datadir \"" + _dataFolder + "\"";
             p.Start();
         }
