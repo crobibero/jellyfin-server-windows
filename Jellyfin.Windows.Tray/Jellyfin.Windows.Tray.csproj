@@ -54,7 +54,7 @@
     <None Update="Resources\AppIcon.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <EmbeddedResource Include="JellyfinIcon.ico" />
+    <Resource Include="Resources\JellyfinIcon.ico" />
   </ItemGroup>
 
 </Project>
