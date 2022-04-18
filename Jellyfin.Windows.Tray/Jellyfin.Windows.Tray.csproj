@@ -54,6 +54,7 @@
     <None Update="Resources\AppIcon.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <Resource Include="JellyfinIcon.ico" />
   </ItemGroup>
 
 </Project>
